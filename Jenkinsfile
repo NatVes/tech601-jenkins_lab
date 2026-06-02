@@ -1,0 +1,40 @@
+pipeline {
+    agent any
+
+    parameters {
+        choice(name: 'ENV', choices: ['DEV', 'PROD'], description: 'Choose environment')
+    }
+
+    stages {
+        stage('Build'){
+            steps {
+                sh '''
+                    #!/bin/bash
+
+                    if [ -z "$ENV" ]; then
+                        echo "ENV variable not found. Please set it and try again"
+                        exit 1
+                    fi
+
+                    if [ "$ENV" != "DEV" ] && [ "$ENV" != "PROD" ]; then
+                        echo "Valid values are: DEV or PROD. Got: $ENV"
+                        exit 1
+                    fi
+
+                    export GOTMPDIR="$JENKINS_HOME/$ENV"
+                    mkdir -p $GOTMPDIR
+                    echo "*** Building the app ..."
+                    go build -o $GOTMPDIR/$ENV main.go
+                '''
+            }
+        }
+        stage('Test') {
+            steps {
+                sh '''
+                    echo "*** Testing the app ..."
+                    go fmt *.go
+                '''
+            }
+        }
+    }
+}
