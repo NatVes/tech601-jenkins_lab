@@ -44,7 +44,7 @@ func basicAPI(w http.ResponseWriter, r *http.Request) {
         return
     }
     resp := Response{
-        Description: fmt.Sprintf("You're viewing the %v api, deployed from branch %v", env, branch),
+        Description: fmt.Sprintf("You're viewing the AMAZING %v api, deployed from branch %v", env, branch),
         Environment: env,
         Time:        time.Now(),
     }
