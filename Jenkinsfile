@@ -5,6 +5,7 @@ pipeline {
 
     environment {
         ENV = "${env.BRANCH_NAME == 'master' ? 'PROD' : 'DEV'}"
+        BRANCH = "${env.BRANCH_NAME}" // Needed by the deployment 
     }
 
     stages {
@@ -16,6 +17,17 @@ pipeline {
         stage('Test') {
             steps {
                 sh 'bash scripts/test.sh'
+            }
+        }
+        stage('Deploy'){
+            when {
+                anyOf {
+                    branch 'master';
+                    branch 'develop'
+                }
+            }
+            steps {
+                sh 'export JENKINS_NODE_COOKIE=do_not_kill ; bash scripts/deploy.sh'
             }
         }
     }
