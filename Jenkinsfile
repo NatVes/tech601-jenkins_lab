@@ -21,6 +21,18 @@ pipeline {
                         message: "Build for job ${env.JOB_NAME} has started - (<${env.BUILD_URL}|Open>)"
             }
         }
+        stage('Scan for secrets') {
+            steps {
+                sh '''
+                    curl -LO https://github.com/gitleaks/gitleaks/releases/download/v8.30.1/gitleaks_8.30.1_linux_x64.tar.gz
+                    tar -xzf gitleaks_8.30.1_linux_x64.tar.gz
+
+                    ./gitleaks protect -v
+
+                    rm -rf gitleaks*
+                '''
+            }
+        }
         stage('Build'){
             steps {
                 sh 'bash scripts/build.sh'
