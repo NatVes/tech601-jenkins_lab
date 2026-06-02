@@ -1,39 +1,21 @@
 pipeline {
     agent any
 
-    parameters {
-        choice(name: 'ENV', choices: ['DEV', 'PROD'], description: 'Choose environment')
+    tools { go 'go 1.19' } // Comes from the jenkins global config
+
+    environment {
+        ENV = "${env.BRANCH_NAME == 'master' ? 'PROD' : 'DEV'}"
     }
 
     stages {
         stage('Build'){
             steps {
-                sh '''
-                    #!/bin/bash
-
-                    if [ -z "$ENV" ]; then
-                        echo "ENV variable not found. Please set it and try again"
-                        exit 1
-                    fi
-
-                    if [ "$ENV" != "DEV" ] && [ "$ENV" != "PROD" ]; then
-                        echo "Valid values are: DEV or PROD. Got: $ENV"
-                        exit 1
-                    fi
-
-                    export GOTMPDIR="$JENKINS_HOME/$ENV"
-                    mkdir -p $GOTMPDIR
-                    echo "*** Building the app ..."
-                    go build -o $GOTMPDIR/$ENV main.go
-                '''
+                sh 'bash scripts/build.sh'
             }
         }
         stage('Test') {
             steps {
-                sh '''
-                    echo "*** Testing the app ..."
-                    go fmt *.go
-                '''
+                sh 'bash scripts/test.sh'
             }
         }
     }
